@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Okosház / IoT — Helyreállítás</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/themes.css">
+</head>
+<body class="theme-okoshaz">
+
+<header class="page-header">
+  <a class="back-link" href="../index.html">← Vissza</a>
+  <h1>🏠 Okosház / IoT helyreállítása</h1>
+  <span class="header-sub">Kutatók Éjszakája — Pályaorientációs demó</span>
+</header>
+
+<main class="puzzle-shell">
+
+  <section class="preview-panel" id="preview">
+    <div class="house">
+      <div id="house-lamp-el" class="house-room house-lamp drop-slot" data-slot-id="slot-lamp" data-apply-class="fixed-lamp">
+        💡<small>Nappali</small>
+      </div>
+
+      <div class="house-room drop-slot" data-slot-id="slot-thermo" data-apply-class="fixed-thermo" data-apply-target="house-thermo-el">
+        🌡️<span id="house-thermo-el" class="house-thermo">21°C</span>
+      </div>
+
+      <div id="house-lock-el" class="house-room house-lock drop-slot" data-slot-id="slot-lock" data-apply-class="fixed-lock">
+        🔒<small>Bejárat</small>
+      </div>
+
+      <div id="house-solar-el" class="house-room house-solar drop-slot" data-slot-id="slot-solar" data-apply-class="fixed-solar">
+        ☀️<small>Napelem</small>
+      </div>
+
+      <div id="house-blind-el" class="house-room house-blind drop-slot" data-slot-id="slot-blind" data-apply-class="fixed-blind">
+        🪟<small>Redőny</small>
+      </div>
+
+      <div id="house-cam-el" class="house-room house-cam drop-slot" data-slot-id="slot-cam" data-apply-class="fixed-cam">
+        📷<small>Kamera</small>
+      </div>
+
+      <div id="house-speaker-el" class="house-room house-speaker drop-slot" data-slot-id="slot-speaker" data-apply-class="fixed-speaker">
+        🔊<small>Hangszóró</small>
+      </div>
+
+      <div id="house-dashboard-el" class="house-dashboard drop-slot" data-slot-id="slot-dashboard" data-apply-class="fixed-dashboard">
+        📋 <span class="dashboard-text">Minden rendszer stabil — 21°C, ajtó zárva, napelem aktív</span>
+      </div>
+    </div>
+  </section>
+
+  <aside class="cards-panel" id="cards-panel"></aside>
+
+  <footer class="rules-bar">
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-label" id="progress-label">0/8 kész</div>
+    <p class="rules-text">
+      Húzd a jobb oldali kódkártyákat a bal oldali okosház megfelelő, szaggatott keretű helyére,
+      hogy minden eszköz újra működjön.
+    </p>
+    <button class="btn-reset" id="reset-btn">🔄 Új próba</button>
+  </footer>
+
+</main>
+
+<div class="certificate-modal" id="certificate-modal">
+  <div class="certificate-box">
+    <canvas id="certificate-canvas" width="800" height="600"></canvas>
+    <input id="certificate-name" type="text" placeholder="A neved (opcionális)" maxlength="40">
+    <div class="certificate-actions">
+      <a id="certificate-download" class="btn-primary" download="oklevel.png">⬇️ Oklevél mentése</a>
+      <button id="certificate-close" class="btn-secondary">Bezárás</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/confetti.js"></script>
+<script src="../assets/js/certificate.js"></script>
+<script src="../assets/js/puzzle-engine.js"></script>
+<script src="../data/okoshaz.config.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => initPuzzle(PUZZLE_CONFIG));
+</script>
+</body>
+</html>

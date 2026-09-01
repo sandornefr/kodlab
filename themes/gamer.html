@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gamer/Streamer Profil — Helyreállítás</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/themes.css">
+</head>
+<body class="theme-gamer">
+
+<header class="page-header">
+  <a class="back-link" href="../index.html">← Vissza</a>
+  <h1>🎮 Gamer/Streamer Profil helyreállítása</h1>
+  <span class="header-sub">Kutatók Éjszakája — Pályaorientációs demó</span>
+</header>
+
+<main class="puzzle-shell">
+
+  <section class="preview-panel" id="preview">
+    <div class="gamer-card" id="gamer-card">
+      <span class="gamer-live-wrap drop-slot" data-slot-id="slot-live" data-apply-class="fixed-live" data-apply-target="live-dot">
+        <span id="live-dot" class="gamer-live-dot"></span>&nbsp;ÉLŐ
+      </span>
+
+      <div id="gamer-avatar-el" class="gamer-avatar drop-slot" data-slot-id="slot-avatar" data-apply-class="fixed-avatar">🦊</div>
+
+      <h1 id="gamer-title-el" class="gamer-title drop-slot" data-slot-id="slot-title" data-apply-class="fixed-title">ShadowFox_LIVE</h1>
+
+      <p id="gamer-followers-el" class="gamer-followers drop-slot" data-slot-id="slot-followers" data-apply-class="fixed-strong">
+        Rajongók száma: 128 400
+      </p>
+
+      <div id="gamer-stream-el" class="gamer-stream drop-slot" data-slot-id="slot-stream" data-apply-class="fixed-stream">▶</div>
+
+      <a href="#" id="gamer-btn-el" class="gamer-login-btn drop-slot" data-slot-id="slot-btn" data-apply-class="fixed-btn" onclick="return false;">Belépés</a>
+
+      <div class="gamer-toggles">
+        <div class="control-chip drop-slot" data-slot-id="slot-bg" data-apply-class="fixed-bg" data-apply-target="gamer-card">🎨 Sötét mód</div>
+        <div class="control-chip drop-slot" data-slot-id="slot-align" data-apply-class="fixed-align" data-apply-target="gamer-card">↔️ Középre igazítás</div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="cards-panel" id="cards-panel"></aside>
+
+  <footer class="rules-bar">
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-label" id="progress-label">0/8 kész</div>
+    <p class="rules-text">
+      Húzd a jobb oldali kódkártyákat a bal oldali oldal megfelelő, szaggatott keretű helyére.
+      Olvasd el a kártya rövid magyarázatát — az segít eldönteni, hova illik!
+    </p>
+    <button class="btn-reset" id="reset-btn">🔄 Új próba</button>
+  </footer>
+
+</main>
+
+<div class="certificate-modal" id="certificate-modal">
+  <div class="certificate-box">
+    <canvas id="certificate-canvas" width="800" height="600"></canvas>
+    <input id="certificate-name" type="text" placeholder="A neved (opcionális)" maxlength="40">
+    <div class="certificate-actions">
+      <a id="certificate-download" class="btn-primary" download="oklevel.png">⬇️ Oklevél mentése</a>
+      <button id="certificate-close" class="btn-secondary">Bezárás</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/confetti.js"></script>
+<script src="../assets/js/certificate.js"></script>
+<script src="../assets/js/puzzle-engine.js"></script>
+<script src="../data/gamer.config.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => initPuzzle(PUZZLE_CONFIG));
+</script>
+</body>
+</html>

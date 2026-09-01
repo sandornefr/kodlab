@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Távközlés & Hálózat — Helyreállítás</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/themes.css">
+</head>
+<body class="theme-halozat">
+
+<header class="page-header">
+  <a class="back-link" href="../index.html">← Vissza</a>
+  <h1>📡 Távközlés & Hálózat helyreállítása</h1>
+  <span class="header-sub">Kutatók Éjszakája — Pályaorientációs demó</span>
+</header>
+
+<main class="puzzle-shell">
+
+  <section class="preview-panel" id="preview">
+    <div class="net-diagram">
+      <div class="net-server">🖥️<br><small>Szerver</small></div>
+
+      <div class="net-link-wrap drop-slot" data-slot-id="slot-cable" data-apply-class="fixed-cable" data-apply-target="net-link-main">
+        <div id="net-link-main" class="net-link">
+          <span id="net-packet-el" class="net-packet"></span>
+        </div>
+      </div>
+
+      <div class="net-node">
+        📡
+        <div class="net-router-led-wrap drop-slot" data-slot-id="slot-led" data-apply-class="fixed-led" data-apply-target="net-router-led-el">
+          <span id="net-router-led-el" class="net-router-led"></span>
+        </div>
+        <small>Router</small>
+      </div>
+
+      <div class="net-wifi-wrap drop-slot" data-slot-id="slot-wifi" data-apply-class="fixed-wifi" data-apply-target="net-wifi-el">
+        <span id="net-wifi-el" class="net-wifi">📶</span>
+      </div>
+
+      <div class="net-phone">
+        📱
+        <div id="net-phone-screen-el" class="net-phone-screen drop-slot" data-slot-id="slot-screen" data-apply-class="fixed-screen">
+          <span id="net-play-el" class="net-play">▶</span>
+        </div>
+        <small>Telefon</small>
+      </div>
+    </div>
+
+    <div class="control-row">
+      <div class="control-chip drop-slot" data-slot-id="slot-packets" data-apply-class="fixed-packets" data-apply-target="net-packet-el">📦 Adatcsomagok indítása</div>
+      <div class="control-chip drop-slot" data-slot-id="slot-optic" data-apply-class="fixed-optic" data-apply-target="net-link-main">🔧 Optikai kábelre csere</div>
+      <div class="control-chip drop-slot" data-slot-id="slot-play" data-apply-class="fixed-play" data-apply-target="net-play-el">▶️ Lejátszás indítása</div>
+      <div class="control-chip drop-slot" data-slot-id="slot-speed" data-apply-class="fixed-speed" data-apply-target="net-speed-el">📊 Sebességkijelző</div>
+    </div>
+
+    <p id="net-speed-el" class="net-speed">1200 Mbps</p>
+  </section>
+
+  <aside class="cards-panel" id="cards-panel"></aside>
+
+  <footer class="rules-bar">
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-label" id="progress-label">0/8 kész</div>
+    <p class="rules-text">
+      Húzd a jobb oldali kódkártyákat a bal oldali diagram vagy a vezérlőpult megfelelő, szaggatott
+      keretű helyére, hogy a videó eljusson a szerverről a telefonig.
+    </p>
+    <button class="btn-reset" id="reset-btn">🔄 Új próba</button>
+  </footer>
+
+</main>
+
+<div class="certificate-modal" id="certificate-modal">
+  <div class="certificate-box">
+    <canvas id="certificate-canvas" width="800" height="600"></canvas>
+    <input id="certificate-name" type="text" placeholder="A neved (opcionális)" maxlength="40">
+    <div class="certificate-actions">
+      <a id="certificate-download" class="btn-primary" download="oklevel.png">⬇️ Oklevél mentése</a>
+      <button id="certificate-close" class="btn-secondary">Bezárás</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/confetti.js"></script>
+<script src="../assets/js/certificate.js"></script>
+<script src="../assets/js/puzzle-engine.js"></script>
+<script src="../data/halozat.config.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => initPuzzle(PUZZLE_CONFIG));
+</script>
+</body>
+</html>
