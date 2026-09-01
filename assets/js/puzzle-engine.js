@@ -66,6 +66,8 @@
       card.style.transform = 'translate(0,0)';
       card.setAttribute('aria-disabled', 'true');
 
+      if (window.playSuccess) window.playSuccess();
+
       doneCount += 1;
       updateProgress();
 
@@ -79,6 +81,7 @@
       card.style.transform = 'translate(0,0)';
       card.classList.add('card-shake');
       setTimeout(() => card.classList.remove('card-shake'), 350);
+      if (window.playMiss) window.playMiss();
     }
 
     function wireCard(card) {
@@ -157,6 +160,7 @@
     if (celebrateBtn) {
       celebrateBtn.addEventListener('click', () => {
         if (window.launchConfetti) window.launchConfetti();
+        if (window.playFanfare) window.playFanfare();
         if (window.showCertificate) window.showCertificate({ themeTitle: config.themeTitle });
       });
     }
