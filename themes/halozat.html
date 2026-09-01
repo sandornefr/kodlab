@@ -22,11 +22,12 @@
 
   <section class="preview-panel" id="preview">
     <div class="net-diagram">
-      <div class="net-server">🖥️<br><small>Szerver</small></div>
+      <div id="net-server-el" class="net-server drop-slot" data-slot-id="slot-server" data-apply-class="fixed-server">🖥️<small>Szerver</small></div>
 
       <div class="net-link-wrap drop-slot" data-slot-id="slot-cable" data-apply-class="fixed-cable" data-apply-target="net-link-main">
         <div id="net-link-main" class="net-link">
-          <span id="net-packet-el" class="net-packet"></span>
+          <span class="net-packet"></span>
+          <span class="net-packet net-packet-2"></span>
         </div>
       </div>
 
@@ -45,45 +46,37 @@
       <div class="net-phone">
         📱
         <div id="net-phone-screen-el" class="net-phone-screen drop-slot" data-slot-id="slot-screen" data-apply-class="fixed-screen">
-          <span id="net-play-el" class="net-play">▶</span>
+          <span class="net-play">▶</span>
         </div>
         <small>Telefon</small>
       </div>
     </div>
 
-    <div class="control-row">
-      <div class="control-chip drop-slot" data-slot-id="slot-packets" data-apply-class="fixed-packets" data-apply-target="net-packet-el">📦 Adatcsomagok indítása</div>
-      <div class="control-chip drop-slot" data-slot-id="slot-optic" data-apply-class="fixed-optic" data-apply-target="net-link-main">🔧 Optikai kábelre csere</div>
-      <div class="control-chip drop-slot" data-slot-id="slot-play" data-apply-class="fixed-play" data-apply-target="net-play-el">▶️ Lejátszás indítása</div>
-      <div class="control-chip drop-slot" data-slot-id="slot-speed" data-apply-class="fixed-speed" data-apply-target="net-speed-el">📊 Sebességkijelző</div>
-    </div>
-
-    <p id="net-speed-el" class="net-speed">1200 Mbps</p>
+    <p id="net-speed-el" class="net-speed drop-slot" data-slot-id="slot-speed" data-apply-class="fixed-speed">📊 Sebesség: <span class="net-speed-value">1200 Mbps</span></p>
   </section>
 
   <aside class="cards-panel" id="cards-panel"></aside>
 
   <footer class="rules-bar">
     <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-    <div class="progress-label" id="progress-label">0/8 kész</div>
+    <div class="progress-label" id="progress-label">0/6 kész</div>
+    <button class="btn-primary celebrate-btn" id="celebrate-btn" hidden>🎉 Kész vagyok, mutasd!</button>
     <p class="rules-text">
-      Húzd a jobb oldali kódkártyákat a bal oldali diagram vagy a vezérlőpult megfelelő, szaggatott
-      keretű helyére, hogy a videó eljusson a szerverről a telefonig.
+      Húzd a jobb oldali kódkártyákat a bal oldali diagram szaggatott keretű elemeire, hogy a videó
+      eljusson a szerverről a telefonig.
     </p>
     <button class="btn-reset" id="reset-btn">🔄 Új próba</button>
   </footer>
 
 </main>
 
-<div class="certificate-modal" id="certificate-modal">
-  <div class="certificate-box">
-    <canvas id="certificate-canvas" width="800" height="600"></canvas>
-    <input id="certificate-name" type="text" placeholder="A neved (opcionális)" maxlength="40">
-    <div class="certificate-actions">
-      <a id="certificate-download" class="btn-primary" download="oklevel.png">⬇️ Oklevél mentése</a>
-      <button id="certificate-close" class="btn-secondary">Bezárás</button>
-    </div>
+<div class="completion-banner" id="certificate-modal">
+  <span class="completion-emoji">🏆</span>
+  <div class="completion-text">
+    <strong>Szuper! Minden elemet a helyére tettél.</strong>
+    <span>Junior Web Design Kihívás teljesítve: <span id="completion-theme"></span></span>
   </div>
+  <button id="certificate-close" class="completion-close" aria-label="Bezárás">✕</button>
 </div>
 
 <script src="../assets/js/confetti.js"></script>

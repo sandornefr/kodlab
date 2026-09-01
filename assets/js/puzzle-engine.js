@@ -34,6 +34,7 @@
     const progressLabel = document.getElementById('progress-label');
     const resetBtn = document.getElementById('reset-btn');
     const closeBtn = document.getElementById('certificate-close');
+    const celebrateBtn = document.getElementById('celebrate-btn');
 
     const slots = Array.from(preview.querySelectorAll('.drop-slot'));
     const slotById = new Map(slots.map((s) => [s.dataset.slotId, s]));
@@ -68,11 +69,8 @@
       doneCount += 1;
       updateProgress();
 
-      if (doneCount === total) {
-        setTimeout(() => {
-          if (window.launchConfetti) window.launchConfetti();
-          if (window.showCertificate) window.showCertificate({ themeTitle: config.themeTitle });
-        }, 250);
+      if (doneCount === total && celebrateBtn) {
+        celebrateBtn.hidden = false;
       }
     }
 
@@ -148,6 +146,7 @@
         applyToTarget(slot, false);
       });
       render();
+      if (celebrateBtn) celebrateBtn.hidden = true;
       if (window.hideCertificate) window.hideCertificate();
       shell.classList.remove('all-done');
     }
@@ -155,6 +154,12 @@
     render();
     resetBtn.addEventListener('click', reset);
     if (closeBtn) closeBtn.addEventListener('click', () => window.hideCertificate && window.hideCertificate());
+    if (celebrateBtn) {
+      celebrateBtn.addEventListener('click', () => {
+        if (window.launchConfetti) window.launchConfetti();
+        if (window.showCertificate) window.showCertificate({ themeTitle: config.themeTitle });
+      });
+    }
   }
 
   window.initPuzzle = initPuzzle;

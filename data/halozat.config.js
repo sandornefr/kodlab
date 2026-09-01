@@ -2,22 +2,16 @@ const PUZZLE_CONFIG = {
   themeTitle: 'Távközlés & Hálózat',
   cards: [
     {
+      id: 'server',
+      code: 'power: on;',
+      hint: 'A szerver ki van kapcsolva! Indítsd el, hogy egyáltalán küldeni tudjon adatot.',
+      targetSlot: 'slot-server',
+    },
+    {
       id: 'cable',
-      code: 'border: 4px solid #6b5320;',
-      hint: 'Nincs kábel a szerver és a router között! Kösd be a rézkábelt.',
+      code: 'background: linear-gradient(90deg, #00e5ff, #00ff9d);',
+      hint: 'Nincs bekötve az optikai kábel a szerver és a router között! Kösd be, hogy elinduljanak az adatcsomagok.',
       targetSlot: 'slot-cable',
-    },
-    {
-      id: 'packets',
-      code: 'animation: packetMove 1.8s linear infinite;',
-      hint: 'A kábelben nem mozog semmi adat. Indítsd el az adatcsomagok folyamatos áramlását!',
-      targetSlot: 'slot-packets',
-    },
-    {
-      id: 'optic',
-      code: '/* réz helyett */ optikai szál',
-      hint: 'A rézkábel lassú. Cseréld optikai szálra, hogy sokkal gyorsabban mozogjanak az adatok!',
-      targetSlot: 'slot-optic',
     },
     {
       id: 'led',
@@ -33,15 +27,9 @@ const PUZZLE_CONFIG = {
     },
     {
       id: 'screen',
-      code: 'display: flex;',
-      hint: 'A telefon kijelzője sötét. Kapcsold be a képernyőt!',
+      code: 'display: flex; opacity: 1;',
+      hint: 'A telefon kijelzője sötét, és nem indul a videó lejátszása. Kapcsold be a képernyőt!',
       targetSlot: 'slot-screen',
-    },
-    {
-      id: 'play',
-      code: 'opacity: 1; /* lejátszás */',
-      hint: 'A videó betöltött, de nem indul a lejátszás. Nyomd meg a play-t!',
-      targetSlot: 'slot-play',
     },
     {
       id: 'speed',

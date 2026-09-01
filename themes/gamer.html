@@ -50,6 +50,7 @@
   <footer class="rules-bar">
     <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
     <div class="progress-label" id="progress-label">0/8 kész</div>
+    <button class="btn-primary celebrate-btn" id="celebrate-btn" hidden>🎉 Kész vagyok, mutasd!</button>
     <p class="rules-text">
       Húzd a jobb oldali kódkártyákat a bal oldali oldal megfelelő, szaggatott keretű helyére.
       Olvasd el a kártya rövid magyarázatát — az segít eldönteni, hova illik!
@@ -59,15 +60,13 @@
 
 </main>
 
-<div class="certificate-modal" id="certificate-modal">
-  <div class="certificate-box">
-    <canvas id="certificate-canvas" width="800" height="600"></canvas>
-    <input id="certificate-name" type="text" placeholder="A neved (opcionális)" maxlength="40">
-    <div class="certificate-actions">
-      <a id="certificate-download" class="btn-primary" download="oklevel.png">⬇️ Oklevél mentése</a>
-      <button id="certificate-close" class="btn-secondary">Bezárás</button>
-    </div>
+<div class="completion-banner" id="certificate-modal">
+  <span class="completion-emoji">🏆</span>
+  <div class="completion-text">
+    <strong>Szuper! Minden elemet a helyére tettél.</strong>
+    <span>Junior Web Design Kihívás teljesítve: <span id="completion-theme"></span></span>
   </div>
+  <button id="certificate-close" class="completion-close" aria-label="Bezárás">✕</button>
 </div>
 
 <script src="../assets/js/confetti.js"></script>

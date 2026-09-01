@@ -22,6 +22,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 html,
 body {
   margin: 0;
@@ -421,60 +425,85 @@ img {
   }
 }
 
-/* ---------- Certificate modal ---------- */
+/* ---------- Completion banner (non-blocking) ---------- */
 
-.certificate-modal {
+.celebrate-btn {
+  animation: celebratePulse 1.6s ease-in-out infinite;
+}
+
+@keyframes celebratePulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(0, 229, 255, 0);
+  }
+}
+
+.completion-banner {
   position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: rgba(5, 2, 10, 0.75);
-  backdrop-filter: blur(4px);
-  z-index: 100;
-  padding: 20px;
-}
-
-.certificate-modal.open {
+  top: 90px;
+  left: 50%;
+  transform: translate(-50%, -20px);
   display: flex;
-}
-
-.certificate-box {
+  align-items: center;
+  gap: 14px;
+  max-width: min(520px, calc(100vw - 32px));
   background: var(--panel);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--panel-border);
+  border: 1px solid rgba(255, 212, 0, 0.4);
   border-radius: var(--radius-lg);
-  padding: 24px;
+  box-shadow: var(--shadow);
+  padding: 16px 18px;
+  z-index: 210;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.completion-banner.open {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+
+.completion-emoji {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.completion-text {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  max-width: 92vw;
-  box-shadow: var(--shadow);
+  gap: 2px;
+  font-size: 0.88rem;
+  color: var(--text-dim);
 }
 
-#certificate-canvas {
-  width: 100%;
-  max-width: 640px;
-  height: auto;
-  border-radius: var(--radius-md);
-}
-
-.certificate-box input {
-  width: 100%;
-  max-width: 400px;
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--panel-border);
-  background: var(--bg-alt);
+.completion-text strong {
   color: var(--text);
-  font-size: 0.95rem;
+  font-size: 0.98rem;
 }
 
-.certificate-actions {
-  display: flex;
-  gap: 12px;
+.completion-close {
+  margin-left: auto;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--panel-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.completion-close:hover {
+  border-color: var(--accent);
+  color: var(--text);
 }
 
 /* ---------- Confetti canvas ---------- */
