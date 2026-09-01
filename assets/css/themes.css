@@ -177,9 +177,8 @@ body.theme-halozat .net-diagram {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  height: 100%;
-  min-height: 420px;
-  padding: 0 10px;
+  min-height: 220px;
+  padding: 40px 10px 0;
 }
 
 body.theme-halozat .net-server,
