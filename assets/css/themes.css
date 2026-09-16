@@ -501,6 +501,15 @@ body.theme-okoshaz .house-dashboard.fixed-dashboard .dashboard-text {
   padding: 18px 20px;
   margin-bottom: 20px;
   position: relative;
+  transition: box-shadow 0.6s ease;
+}
+
+.ai-gate.gate-eye-open {
+  box-shadow: inset 0 0 46px rgba(255, 82, 82, 0.12);
+}
+
+.ai-gate.gate-eye-closed {
+  box-shadow: inset 0 0 46px rgba(0, 255, 157, 0.09);
 }
 
 .ai-gate.gate-solved {
@@ -525,6 +534,8 @@ body.theme-okoshaz .house-dashboard.fixed-dashboard .dashboard-text {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -536,9 +547,18 @@ body.theme-okoshaz .house-dashboard.fixed-dashboard .dashboard-text {
   transition: background 0.3s ease, transform 0.3s ease;
 }
 
-.ai-eye.eye-green {
-  border-color: var(--ok);
-  box-shadow: 0 0 16px rgba(0, 255, 157, 0.35);
+.ai-eye-lid {
+  position: absolute;
+  inset: -2px;
+  background: #0c1c14;
+  border-radius: 50%;
+  transform-origin: top;
+  transform: scaleY(0);
+  transition: transform 0.45s linear;
+}
+
+.ai-eye.eye-green .ai-eye-lid {
+  transform: scaleY(1);
 }
 
 .ai-eye.eye-green .ai-eye-pupil {
@@ -548,8 +568,11 @@ body.theme-okoshaz .house-dashboard.fixed-dashboard .dashboard-text {
 
 .ai-eye.eye-red {
   border-color: #ff5252;
-  box-shadow: 0 0 16px rgba(255, 82, 82, 0.45);
-  animation: eyeAlert 0.5s ease-in-out infinite alternate;
+  animation: eyeGlowPulse 0.9s ease-in-out infinite alternate;
+}
+
+.ai-eye.eye-red .ai-eye-lid {
+  transform: scaleY(0);
 }
 
 .ai-eye.eye-red .ai-eye-pupil {
@@ -557,12 +580,12 @@ body.theme-okoshaz .house-dashboard.fixed-dashboard .dashboard-text {
   transform: scale(1);
 }
 
-@keyframes eyeAlert {
+@keyframes eyeGlowPulse {
   from {
-    transform: scale(1);
+    box-shadow: 0 0 10px rgba(255, 82, 82, 0.35);
   }
   to {
-    transform: scale(1.08);
+    box-shadow: 0 0 22px rgba(255, 82, 82, 0.7);
   }
 }
 
@@ -572,8 +595,13 @@ body.theme-okoshaz .house-dashboard.fixed-dashboard .dashboard-text {
   box-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
 }
 
+.ai-eye.eye-victory .ai-eye-lid {
+  transform: scaleY(0);
+}
+
 .ai-eye.eye-victory .ai-eye-pupil {
   background: var(--accent);
+  transform: scale(0.7);
 }
 
 .ai-gate-heading {

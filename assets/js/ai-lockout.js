@@ -132,6 +132,8 @@
     function renderEyeState() {
       eyeEl.classList.toggle('eye-green', eyeState === 'green');
       eyeEl.classList.toggle('eye-red', eyeState === 'red');
+      gateEl.classList.toggle('gate-eye-open', eyeState === 'red');
+      gateEl.classList.toggle('gate-eye-closed', eyeState === 'green');
       if (!state.codeRevealed) {
         statusEl.textContent = eyeState === 'green'
           ? 'Jarvis most nem figyel — mozdulhatsz!'
@@ -297,6 +299,8 @@
       eyeState = 'green';
       eyeEl.classList.remove('eye-red');
       eyeEl.classList.add('eye-green', 'eye-victory');
+      gateEl.classList.remove('gate-eye-open');
+      gateEl.classList.add('gate-eye-closed');
       statusEl.textContent = 'A rendszer résein kiszivárgott egy kód!';
       codeRevealEl.hidden = false;
       codeInputEl.focus();
