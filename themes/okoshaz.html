@@ -21,48 +21,96 @@
 <main class="puzzle-shell">
 
   <section class="preview-panel" id="preview">
-    <div class="house">
-      <div id="house-lamp-el" class="house-room house-lamp drop-slot" data-slot-id="slot-lamp" data-apply-class="fixed-lamp">
-        💡<small>Nappali</small>
+
+    <div class="ai-gate" id="ai-gate">
+      <div class="ai-gate-header">
+        <span class="ai-eye" id="ai-eye" aria-hidden="true"><span class="ai-eye-pupil"></span></span>
+        <div class="ai-gate-heading">
+          <strong>HázAI zárolta a rendszert</strong>
+          <span id="ai-gate-status" aria-live="polite">Az AI figyeli a rendszert. Válassz pillanatot!</span>
+        </div>
+        <div class="ai-attempts">Próbálkozás: <span id="ai-attempts-value">5</span>/5</div>
       </div>
 
-      <div class="house-room drop-slot" data-slot-id="slot-thermo" data-apply-class="fixed-thermo" data-apply-target="house-thermo-el">
-        🌡️<span id="house-thermo-el" class="house-thermo">21°C</span>
+      <div class="ai-gate-controls">
+        <div class="ai-control" id="ai-thermo-control">
+          <span class="ai-control-icon">🌡️</span>
+          <div class="ai-control-body">
+            <span class="ai-control-label">Termosztát</span>
+            <div class="ai-stepper">
+              <button type="button" class="ai-stepper-btn" id="ai-thermo-minus" aria-label="Hűtés">−</button>
+              <span class="ai-stepper-value" id="ai-thermo-value">21°C</span>
+              <button type="button" class="ai-stepper-btn" id="ai-thermo-plus" aria-label="Fűtés">+</button>
+            </div>
+          </div>
+          <span class="ai-control-check" id="ai-thermo-check" hidden>✓</span>
+        </div>
+
+        <div class="ai-control" id="ai-lamp-control">
+          <span class="ai-control-icon">💡</span>
+          <div class="ai-control-body">
+            <span class="ai-control-label">Lámpakapcsoló</span>
+            <button type="button" class="ai-lamp-toggle" id="ai-lamp-toggle">Kattints 3x</button>
+          </div>
+          <span class="ai-control-check" id="ai-lamp-check" hidden>✓</span>
+        </div>
       </div>
 
-      <div id="house-lock-el" class="house-room house-lock drop-slot" data-slot-id="slot-lock" data-apply-class="fixed-lock">
+      <div class="ai-code-reveal" id="ai-code-reveal" hidden>
+        <p>A rendszer résein kiszivárgott egy kód: <strong id="ai-code-value">2503</strong></p>
+        <form class="ai-code-form" id="ai-code-form">
+          <input type="text" inputmode="numeric" maxlength="4" id="ai-code-input" placeholder="Kód" aria-label="Négyjegyű kód" autocomplete="off">
+          <button type="submit" class="btn-primary">Kiiktatás</button>
+        </form>
+        <p class="ai-code-error" id="ai-code-error" hidden>Ez nem stimmel, próbáld újra!</p>
+      </div>
+
+      <div class="ai-gameover" id="ai-gameover" hidden>
+        <div class="ai-gameover-face" aria-hidden="true">
+          <div class="ai-gameover-eye left"></div>
+          <div class="ai-gameover-eye right"></div>
+          <div class="ai-gameover-mouth"></div>
+        </div>
+        <p id="ai-gameover-msg">Hoppá, elfogytak a próbálkozásaid!</p>
+      </div>
+    </div>
+
+    <div class="house" id="house">
+      <div id="house-lock-el" class="house-room house-lock drop-slot ai-locked" data-slot-id="slot-lock" data-apply-class="fixed-lock">
         🔒<small>Bejárat</small>
       </div>
 
-      <div id="house-solar-el" class="house-room house-solar drop-slot" data-slot-id="slot-solar" data-apply-class="fixed-solar">
+      <div id="house-solar-el" class="house-room house-solar drop-slot ai-locked" data-slot-id="slot-solar" data-apply-class="fixed-solar">
         ☀️<small>Napelem</small>
       </div>
 
-      <div id="house-blind-el" class="house-room house-blind drop-slot" data-slot-id="slot-blind" data-apply-class="fixed-blind">
+      <div id="house-blind-el" class="house-room house-blind drop-slot ai-locked" data-slot-id="slot-blind" data-apply-class="fixed-blind">
         🪟<small>Redőny</small>
       </div>
 
-      <div id="house-cam-el" class="house-room house-cam drop-slot" data-slot-id="slot-cam" data-apply-class="fixed-cam">
+      <div id="house-cam-el" class="house-room house-cam drop-slot ai-locked" data-slot-id="slot-cam" data-apply-class="fixed-cam">
         📷<small>Kamera</small>
       </div>
 
-      <div id="house-speaker-el" class="house-room house-speaker drop-slot" data-slot-id="slot-speaker" data-apply-class="fixed-speaker">
+      <div id="house-speaker-el" class="house-room house-speaker drop-slot ai-locked" data-slot-id="slot-speaker" data-apply-class="fixed-speaker">
         🔊<small>Hangszóró</small>
       </div>
 
-      <div id="house-dashboard-el" class="house-dashboard drop-slot" data-slot-id="slot-dashboard" data-apply-class="fixed-dashboard">
+      <div id="house-dashboard-el" class="house-dashboard drop-slot ai-locked" data-slot-id="slot-dashboard" data-apply-class="fixed-dashboard">
         📋 <span class="dashboard-text">Minden rendszer stabil — 21°C, ajtó zárva, napelem aktív</span>
       </div>
     </div>
   </section>
 
-  <aside class="cards-panel" id="cards-panel"></aside>
+  <aside class="cards-panel" id="cards-panel">
+    <p class="cards-panel-placeholder" id="cards-panel-placeholder">🔒 Előbb iktasd ki a HázAI-t, hogy előkerüljenek a javító kártyák.</p>
+  </aside>
 
   <footer class="rules-bar">
-    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-    <div class="progress-label" id="progress-label">0/8 kész</div>
+    <div class="progress-track" id="progress-track" hidden><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-label" id="progress-label" hidden>0/6 kész</div>
     <button class="btn-primary celebrate-btn" id="celebrate-btn" hidden>🎉 Kész vagyok, mutasd!</button>
-    <p class="rules-text">
+    <p class="rules-text" id="rules-text" hidden>
       Húzd a jobb oldali kódkártyákat a bal oldali okosház megfelelő, szaggatott keretű helyére,
       hogy minden eszköz újra működjön.
     </p>
@@ -81,13 +129,20 @@
   <button id="certificate-close" class="completion-close" aria-label="Bezárás">✕</button>
 </div>
 
+<button class="help-toggle" id="help-toggle" aria-expanded="false">📖 Biztonsági kézikönyv</button>
+<div class="help-panel" id="help-panel" hidden>
+  <div class="help-panel-header">
+    <strong>Biztonsági kézikönyv</strong>
+    <button class="help-panel-close" id="help-panel-close" aria-label="Bezárás">✕</button>
+  </div>
+  <div class="help-panel-body" id="help-panel-body"></div>
+</div>
+
 <script src="../assets/js/confetti.js"></script>
 <script src="../assets/js/sound.js"></script>
 <script src="../assets/js/certificate.js"></script>
 <script src="../assets/js/puzzle-engine.js"></script>
 <script src="../data/okoshaz.config.js"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', () => initPuzzle(PUZZLE_CONFIG));
-</script>
+<script src="../assets/js/ai-lockout.js"></script>
 </body>
 </html>

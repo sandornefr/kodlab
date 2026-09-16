@@ -517,6 +517,91 @@ img {
   color: var(--text);
 }
 
+/* ---------- Súgó panel (nem blokkoló) ---------- */
+
+.help-toggle {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  z-index: 150;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 11px 18px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease, border-color 0.2s;
+}
+
+.help-toggle:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.help-panel {
+  position: fixed;
+  left: 20px;
+  bottom: 76px;
+  z-index: 150;
+  width: min(360px, calc(100vw - 40px));
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--panel);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 16px 18px;
+}
+
+.help-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.help-panel-header strong {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+}
+
+.help-panel-close {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--panel-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.help-panel-close:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.help-panel-body p {
+  margin: 0 0 10px;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+.help-panel-body p:last-child {
+  margin-bottom: 0;
+}
+
 /* ---------- Confetti canvas ---------- */
 
 .confetti-canvas {

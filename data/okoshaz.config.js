@@ -2,18 +2,6 @@ const PUZZLE_CONFIG = {
   themeTitle: 'Okosház / IoT',
   cards: [
     {
-      id: 'lamp',
-      code: 'box-shadow: 0 0 14px #ffe27a;',
-      hint: 'A nappali sötét! Kapcsold fel a lámpát, hogy fény öntse el a szobát.',
-      targetSlot: 'slot-lamp',
-    },
-    {
-      id: 'thermo',
-      code: 'color: #00ff9d;',
-      hint: 'A hőmérő kijelzője üres. Jelenítsd meg a pontos hőfokot!',
-      targetSlot: 'slot-thermo',
-    },
-    {
       id: 'lock',
       code: 'filter: drop-shadow(0 0 10px #00ff9d);',
       hint: 'Az ajtó nyitva maradt! Zárd be, és jelezze zölden, hogy biztonságban vagy.',
