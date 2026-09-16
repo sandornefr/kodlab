@@ -9,8 +9,10 @@
   const MIN_TEMP = 10;
   const MAX_TEMP = 32;
   const SECRET_CODE = '2503';
-  const GREEN_MS = 3000;
-  const RED_MS = 1500;
+  const GREEN_MIN_MS = 1200;
+  const GREEN_MAX_MS = 4000;
+  const RED_MIN_MS = 700;
+  const RED_MAX_MS = 2600;
 
   const TRICKS = [
     {
@@ -137,8 +139,14 @@
       }
     }
 
+    function randomBetween(min, max) {
+      return min + Math.random() * (max - min);
+    }
+
     function scheduleEyeTick() {
-      const delay = eyeState === 'green' ? GREEN_MS : RED_MS;
+      const delay = eyeState === 'green'
+        ? randomBetween(GREEN_MIN_MS, GREEN_MAX_MS)
+        : randomBetween(RED_MIN_MS, RED_MAX_MS);
       eyeTimer = setTimeout(() => {
         eyeState = eyeState === 'green' ? 'red' : 'green';
         renderEyeState();
