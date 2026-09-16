@@ -88,12 +88,30 @@
       let startX = 0;
       let startY = 0;
       let dragging = false;
+      let placeholder = null;
 
       card.addEventListener('pointerdown', (e) => {
         if (card.classList.contains('card-done')) return;
         dragging = true;
         startX = e.clientX;
         startY = e.clientY;
+
+        // A kártyák panelje overflow-y:auto, ami levágná a kártyát, amint
+        // vízszintesen kilóg belőle húzás közben — ezért húzás alatt kiemeljük
+        // a body-ba (fixed pozícióval), a helyét meg egy placeholder tartja.
+        const rect = card.getBoundingClientRect();
+        placeholder = document.createElement('div');
+        placeholder.className = 'code-card-placeholder';
+        placeholder.style.width = `${rect.width}px`;
+        placeholder.style.height = `${rect.height}px`;
+        card.parentNode.insertBefore(placeholder, card);
+
+        card.style.width = `${rect.width}px`;
+        card.style.position = 'fixed';
+        card.style.left = `${rect.left}px`;
+        card.style.top = `${rect.top}px`;
+        document.body.appendChild(card);
+
         card.style.transition = 'none';
         card.classList.add('dragging');
         card.setPointerCapture(e.pointerId);
@@ -105,6 +123,17 @@
         const dy = e.clientY - startY;
         card.style.transform = `translate(${dx}px, ${dy}px)`;
       });
+
+      function returnToPanel() {
+        if (placeholder) {
+          placeholder.replaceWith(card);
+          placeholder = null;
+        }
+        card.style.position = '';
+        card.style.left = '';
+        card.style.top = '';
+        card.style.width = '';
+      }
 
       function endDrag(e) {
         if (!dragging) return;
@@ -121,6 +150,8 @@
         card.style.pointerEvents = '';
 
         const slot = el ? el.closest('.drop-slot') : null;
+        returnToPanel();
+
         if (slot && slot.dataset.slotId === card.dataset.targetSlot && !slot.classList.contains('slot-filled')) {
           onSuccess(card, slot);
         } else {
