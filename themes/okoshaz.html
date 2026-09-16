@@ -9,8 +9,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/themes.css">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+<link rel="icon" href="../assets/icons/icon-192.png">
+<meta name="theme-color" content="#0a0614">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="KÓDLAB">
 </head>
-<body class="theme-okoshaz">
+<body class="theme-okoshaz" data-sw-depth="1">
+
+<div class="ai-onboarding" id="ai-onboarding">
+  <div class="ai-onboarding-card" id="ai-onboarding-card">
+    <p class="ai-onboarding-eyebrow" id="ai-onboarding-eyebrow">🏠 HÁZŐRZŐ</p>
+    <div class="ai-onboarding-scene" id="ai-onboarding-scene" hidden>
+      <canvas id="ai-house-scene" class="ai-house-scene" aria-hidden="true"></canvas>
+    </div>
+    <p class="ai-onboarding-line" id="ai-onboarding-line"></p>
+    <div class="ai-onboarding-body" id="ai-onboarding-body"></div>
+  </div>
+</div>
 
 <header class="page-header">
   <a class="back-link" href="../index.html">← Vissza</a>
@@ -22,8 +40,14 @@
 
   <section class="preview-panel" id="preview">
 
-    <div class="ai-gate" id="ai-gate">
-      <div class="ai-gate-header">
+    <div class="hub-statusbar">🏠 HÁZŐRZŐ <span class="hub-status-dot" aria-hidden="true"></span> Online</div>
+
+    <div class="ai-gate intro-active" id="ai-gate">
+      <div class="ai-gate-streak" id="ai-gate-streak" aria-hidden="true"></div>
+
+      <div class="ai-scene-wrap" id="ai-scene-wrap" hidden></div>
+
+      <div class="ai-gate-header" id="ai-gate-header" hidden>
         <span class="ai-eye" id="ai-eye" aria-hidden="true">
           <span class="ai-eye-sclera">
             <span class="ai-eye-iris">
@@ -35,10 +59,10 @@
           <span class="ai-eye-lid"></span>
         </span>
         <div class="ai-gate-heading">
-          <strong>Jarvis (ejtsd: Dzsárvisz) zárolta a rendszert</strong>
+          <strong>⚠ Meghibásodás — Jarvis mindent zárolt</strong>
           <span id="ai-gate-status" aria-live="polite">Jarvis figyeli a rendszert. Válassz pillanatot!</span>
         </div>
-        <div class="ai-attempts">Próbálkozás: <span id="ai-attempts-value">5</span>/5</div>
+        <div class="ai-attempts">Szint: <span id="ai-level-value">1</span>/5</div>
       </div>
 
       <div class="ai-gate-controls">
@@ -99,22 +123,32 @@
         </div>
       </div>
 
+      <div class="ai-keys" id="ai-keys" aria-live="polite">
+        <span class="ai-key-chip" data-key-slot="0"></span>
+        <span class="ai-key-chip" data-key-slot="1"></span>
+        <span class="ai-key-chip" data-key-slot="2"></span>
+        <span class="ai-key-chip" data-key-slot="3"></span>
+        <span class="ai-key-chip" data-key-slot="4"></span>
+      </div>
+
       <div class="ai-code-reveal" id="ai-code-reveal" hidden>
-        <p>A rendszer résein kiszivárgott egy kód: <strong id="ai-code-value">2503</strong></p>
+        <p>Rakd össze az 5 megfejtett kulcsszót egy mondattá, és írd be, mi okozhatta a hibát:</p>
         <form class="ai-code-form" id="ai-code-form">
-          <input type="text" inputmode="numeric" maxlength="4" id="ai-code-input" placeholder="Kód" aria-label="Négyjegyű kód" autocomplete="off">
-          <button type="submit" class="btn-primary">Kiiktatás</button>
+          <input type="text" id="ai-code-input" placeholder="Írd ide a választ" aria-label="Végső megoldás" autocomplete="off">
+          <button type="submit" class="btn-primary">Feloldás</button>
         </form>
         <p class="ai-code-error" id="ai-code-error" hidden>Ez nem stimmel, próbáld újra!</p>
       </div>
 
-      <div class="ai-gameover" id="ai-gameover" hidden>
-        <div class="ai-gameover-face" aria-hidden="true">
-          <div class="ai-gameover-eye left"></div>
-          <div class="ai-gameover-eye right"></div>
-          <div class="ai-gameover-mouth"></div>
+      <p class="ai-cause-reveal" id="ai-cause-reveal" hidden>🕷️ Kiderült: egy pók okozta a rövidzárlatot a szellőzőrendszerben!</p>
+
+      <div class="ai-vigilance" id="ai-vigilance" hidden>
+        <div class="ai-vigilance-face" aria-hidden="true">
+          <div class="ai-vigilance-eye left"></div>
+          <div class="ai-vigilance-eye right"></div>
+          <div class="ai-vigilance-mouth"></div>
         </div>
-        <p id="ai-gameover-msg">Hoppá, elfogytak a próbálkozásaid!</p>
+        <p id="ai-vigilance-msg">Gyanús mozgást észlelek. Szigorúbban figyelek mostantól!</p>
       </div>
     </div>
 
@@ -146,7 +180,20 @@
   </section>
 
   <aside class="cards-panel" id="cards-panel">
-    <p class="cards-panel-placeholder" id="cards-panel-placeholder">🔒 Előbb iktasd ki a Jarvist, hogy előkerüljenek a javító kártyák.</p>
+    <div class="ai-handbook" id="ai-handbook">
+      <div class="ai-handbook-header">
+        <strong>📖 Biztonsági kézikönyv</strong>
+        <span class="ai-handbook-counter" id="ai-handbook-counter">1 / 1</span>
+      </div>
+      <div class="ai-handbook-page" id="ai-handbook-page">
+        <p class="ai-handbook-title" id="ai-handbook-title"></p>
+        <p class="ai-handbook-body" id="ai-handbook-body"></p>
+      </div>
+      <div class="ai-handbook-nav">
+        <button type="button" class="ai-handbook-btn" id="ai-handbook-prev" aria-label="Előző oldal">← Előző</button>
+        <button type="button" class="ai-handbook-btn" id="ai-handbook-next" aria-label="Következő oldal">Következő →</button>
+      </div>
+    </div>
   </aside>
 
   <footer class="rules-bar">
@@ -172,20 +219,13 @@
   <button id="certificate-close" class="completion-close" aria-label="Bezárás">✕</button>
 </div>
 
-<button class="help-toggle" id="help-toggle" aria-expanded="false">📖 Biztonsági kézikönyv</button>
-<div class="help-panel" id="help-panel" hidden>
-  <div class="help-panel-header">
-    <strong>Biztonsági kézikönyv</strong>
-    <button class="help-panel-close" id="help-panel-close" aria-label="Bezárás">✕</button>
-  </div>
-  <div class="help-panel-body" id="help-panel-body"></div>
-</div>
-
 <script src="../assets/js/confetti.js"></script>
 <script src="../assets/js/sound.js"></script>
 <script src="../assets/js/certificate.js"></script>
+<script src="../assets/js/house-scene.js"></script>
 <script src="../assets/js/puzzle-engine.js"></script>
 <script src="../data/okoshaz.config.js"></script>
 <script src="../assets/js/ai-lockout.js"></script>
+<script src="../assets/js/pwa.js"></script>
 </body>
 </html>

@@ -1,62 +1,139 @@
-// Okosház "AI-kiiktatás" kapu-rejtvény: piros lámpa / zöld lámpa mechanika a
-// puzzle-engine.js elé kapcsolva. Próbálkozásonként más a trükk — ha lebuksz,
-// az AI kiszúrja az aktuális megoldást, és a következő körben már mást kell
-// csinálni. A 6 megmaradó eszköz feloldása után a meglévő, generikus
-// húzd-és-vidd motor veszi át a vezérlést változatlanul.
+// Okosház "AI-kiiktatás" kapu-rejtvény. Bevezető: egy teljes képernyős, lépésenkénti
+// onboarding-varázsló (üdvözlés → belépés → név → köszönés → hangulat → redőny → zene →
+// fűtés → napelem), amiben minden lépés a látogató kattintására vár — nincs automatikus
+// időzítő. Utána Jarvis hirtelen meghibásodik és mindent lezár. Onnantól 5 szint, mindegyikhez
+// egy találós kérdés (nem közvetlen utasítás) — a helyes kombó zöld fényben felold egy
+// kulcsszót. Ha Jarvis rajtakap, nem indul újra semmi, csak egyre gyanakvóbb/szigorúbb lesz.
+// Az 5 kulcsszó együtt adja ki a végső, beírandó mondatot. A jobb oldali panelen egy lapozható
+// biztonsági kézikönyv mindig mutatja az aktuális teendőt. A 6 megmaradó eszköz feloldása után
+// a meglévő, generikus húzd-és-vidd motor (puzzle-engine.js) veszi át a vezérlést változatlanul.
 (function () {
-  const MAX_ATTEMPTS = 5;
   const START_TEMP = 21;
   const MIN_TEMP = 10;
   const MAX_TEMP = 32;
-  const SECRET_CODE = '2503';
-  const GREEN_MIN_MS = 1200;
-  const GREEN_MAX_MS = 4000;
-  const RED_MIN_MS = 700;
-  const RED_MAX_MS = 2600;
 
-  const TRICKS = [
+  const GREEN_MIN_BASE = 1200;
+  const GREEN_MAX_BASE = 4000;
+  const RED_MIN_BASE = 700;
+  const RED_MAX_BASE = 2600;
+  const GREEN_MIN_FLOOR = 900;
+  const RED_MAX_CEIL = 3200;
+  const MAX_VIGILANCE_STEPS = 4;
+  const STRIKES_PER_ESCALATION = 3;
+
+  const MOOD_OPTIONS = [
+    { emoji: '😄', label: 'Szuper', reply: 'Ez az energia! Örülök, hogy ilyen jó napod volt.' },
+    { emoji: '🙂', label: 'Jó', reply: 'Ez jól hangzik, örülök neki!' },
+    { emoji: '😐', label: 'Átlagos', reply: 'Rendben, néha ilyen egy nap. Remélem, ez a pár perc feldob egy kicsit!' },
+    { emoji: '😕', label: 'Nem túl jó', reply: 'Sajnálom, hogy nem alakult jól a nap. Remélem, itt egy kicsit jobban érzed majd magad.' },
+    { emoji: '😢', label: 'Rossz', reply: 'Ez nehéz lehetett. Igyekszem, hogy legalább itt legyen egy kis jó élményed ma.' },
+  ];
+
+  const ONBOARDING_STEPS = [
+    { type: 'welcome' },
+    { type: 'name' },
+    { type: 'greeting' },
+    { type: 'mood' },
+    {
+      type: 'yesno',
+      key: 'blind',
+      prompt: 'Redőnyt felhúzzam?',
+      yes: 'Máris felhúzom, hadd jöjjön be a fény!',
+      no: 'Rendben, hagyom lehúzva.',
+      showScene: true,
+    },
+    {
+      type: 'yesno',
+      key: 'music',
+      prompt: 'Indíthatom a kedvenc zenédet?',
+      yes: 'Szóljon akkor egy nyugis kis szám!',
+      no: 'Rendben, maradok csendben.',
+      showScene: true,
+    },
+    {
+      type: 'yesno',
+      key: 'heat',
+      prompt: 'Optimalizáljam a fűtést 21 fokra?',
+      yes: 'Máris állítom, mindjárt kellemes meleg lesz.',
+      no: 'Rendben, hagyom a jelenlegi hőfokon.',
+      showScene: true,
+    },
+    {
+      type: 'info',
+      key: 'solar',
+      prompt: 'A napelem ma 26,6 kW-ot termelt, mert szép időnk volt.',
+      ack: 'Szuper!',
+      showScene: true,
+    },
+  ];
+
+  const LEVELS = [
     {
       blind: 'open',
       lamp: 3,
-      describe: 'húzd fel a redőnyt, és kattints 3x a lámpakapcsolóra',
+      riddle: 'Háromszor váltja egymást a fény és a sötét — aztán a napfény is beszűrődik az ablakon.',
+      key: 'EGY',
     },
     {
       thermo: 25,
       lamp: 3,
-      describe: 'állítsd a termosztátot pontosan 25°C-ra, és kattints 3x a lámpakapcsolóra',
+      riddle: 'A hőmérséklet emelkedjen pontosan 25 fokra — mint egy kellemes nyári nap —, és eközben még háromszor billenjen a kapcsoló is.',
+      key: 'PÓK',
     },
     {
       inverter: 'on',
       blind: 'closed',
-      describe: 'kapcsold be a napelem invertert, és húzd le a redőnyt',
+      riddle: 'Ébressz fel valamit, ami a napból él, majd engedd vissza sötétbe azt, amit az előbb kiengedtél a fényre.',
+      key: 'OKOZTA',
     },
     {
       speaker: 7,
       lamp: 5,
-      describe: 'állítsd a hangszórót 7-es hangerőre, és kattints 5x a lámpakapcsolóra',
+      riddle: 'Told fel a hangot hétig, mintha egy zenekar hangolna — és a fény ötször pisloghat, mire kész a hangzás.',
+      key: 'A',
     },
     {
       blind: 'open',
       thermo: 25,
       inverter: 'on',
       speaker: 7,
-      describe:
-        'húzd fel a redőnyt, állítsd a termosztátot 25°C-ra, kapcsold be az invertert, és ' +
-        'állítsd a hangszórót 7-es szintre — mindezt egyszerre',
+      riddle:
+        'Idézd fel újra a reggelt: eressz be mindent, amit egyszer már kiengedtél — a fényt az ' +
+        'ablakon, a kellemes 25 fokos meleget, a nap erejét, és a zenét hetes hangerőn — mind ' +
+        'egyszerre, ahogy régen volt.',
+      key: 'RÖVIDZÁRLATOT',
     },
   ];
 
-  const GAMEOVER_MESSAGES = [
-    'Aranyos próbálkozás, ember. Kezdjük elölről!',
-    'Ó, majdnem! A rendszer újraindul…',
-    'Csúnyán benne hagytam a nyomot. Újra!',
+  const FINAL_PHRASE = LEVELS.map((l) => l.key).join(' ');
+
+  const VIGILANCE_MESSAGES = [
+    'Gyanús mozgást észlelek. Szigorúbban figyelek mostantól!',
+    'Ismerem ezt a trükköt is. Kapcsolok egy fokozattal feljebb.',
+    'Egyre óvatosabb vagy — de én is egyre éberebb leszek.',
   ];
 
+  const HANDBOOK_INTRO = {
+    title: 'Bevezető',
+    body:
+      'A HÁZŐRZŐ rendszer motorja a KANDÓ (Központi Automatizált Neurális Digitális ' +
+      'Óvórendszer) meghibásodott, és mindent zárolt. Fejtsd meg a rejtvényeket, hogy ' +
+      'megtaláld a hibát! Figyeld Jarvis szemét: ha PIROS, akkor figyel — ilyenkor semmihez ' +
+      'ne nyúlj, mert azt hiszi, fel akarod törni a rendszert, és szigorítja a hibaelhárítást ' +
+      '(egyre rövidebb lesz a zöld, egyre hosszabb a piros időszak). Csak akkor mozdulj, ' +
+      'amikor a szem ZÖLDRE vált! Ha mégis rajtakap, nem veszítesz semmit, csak óvatosabban ' +
+      'kell majd időzítened legközelebb.',
+  };
+
   document.addEventListener('DOMContentLoaded', () => {
+    const canSpeak = !!window.speechSynthesis;
+
     const gateEl = document.getElementById('ai-gate');
+    const streakEl = document.getElementById('ai-gate-streak');
+    const gateHeaderEl = document.getElementById('ai-gate-header');
     const eyeEl = document.getElementById('ai-eye');
     const statusEl = document.getElementById('ai-gate-status');
-    const attemptsValueEl = document.getElementById('ai-attempts-value');
+    const levelValueEl = document.getElementById('ai-level-value');
 
     const blindVisualEl = document.getElementById('ai-blind-visual');
     const blindToggleBtn = document.getElementById('ai-blind-toggle');
@@ -81,41 +158,59 @@
     const speakerBarEls = Array.from(document.querySelectorAll('#ai-speaker-bars span'));
     const speakerCheckEl = document.getElementById('ai-speaker-check');
 
+    const keyChipEls = Array.from(document.querySelectorAll('#ai-keys .ai-key-chip'));
+
     const codeRevealEl = document.getElementById('ai-code-reveal');
-    const codeValueEl = document.getElementById('ai-code-value');
     const codeFormEl = document.getElementById('ai-code-form');
     const codeInputEl = document.getElementById('ai-code-input');
     const codeErrorEl = document.getElementById('ai-code-error');
+    const causeRevealEl = document.getElementById('ai-cause-reveal');
 
-    const gameOverEl = document.getElementById('ai-gameover');
-    const gameOverMsgEl = document.getElementById('ai-gameover-msg');
+    const vigilanceEl = document.getElementById('ai-vigilance');
+    const vigilanceMsgEl = document.getElementById('ai-vigilance-msg');
 
-    const cardsPanelPlaceholder = document.getElementById('cards-panel-placeholder');
     const progressTrackEl = document.getElementById('progress-track');
     const progressLabelEl = document.getElementById('progress-label');
     const rulesTextEl = document.getElementById('rules-text');
     const resetBtn = document.getElementById('reset-btn');
     const lockedRooms = Array.from(document.querySelectorAll('.ai-locked'));
 
-    const helpToggleBtn = document.getElementById('help-toggle');
-    const helpPanelEl = document.getElementById('help-panel');
-    const helpPanelCloseBtn = document.getElementById('help-panel-close');
-    const helpBodyEl = document.getElementById('help-panel-body');
+    const sceneWrapEl = document.getElementById('ai-scene-wrap');
+    const sceneCanvasEl = document.getElementById('ai-house-scene');
 
-    codeValueEl.textContent = SECRET_CODE;
+    const onboardingEl = document.getElementById('ai-onboarding');
+    const onboardingCardEl = document.getElementById('ai-onboarding-card');
+    const onboardingEyebrowEl = document.getElementById('ai-onboarding-eyebrow');
+    const onboardingSceneEl = document.getElementById('ai-onboarding-scene');
+    const onboardingLineEl = document.getElementById('ai-onboarding-line');
+    const onboardingBodyEl = document.getElementById('ai-onboarding-body');
+
+    const handbookPageEl = document.getElementById('ai-handbook-page');
+    const handbookTitleEl = document.getElementById('ai-handbook-title');
+    const handbookBodyEl = document.getElementById('ai-handbook-body');
+    const handbookCounterEl = document.getElementById('ai-handbook-counter');
+    const handbookPrevBtn = document.getElementById('ai-handbook-prev');
+    const handbookNextBtn = document.getElementById('ai-handbook-next');
+
+    let houseScene = null;
 
     const state = {
-      attempts: MAX_ATTEMPTS,
-      trickIndex: 0,
+      userName: 'Kedves Látogató',
+      introDone: false,
+      levelIndex: 0,
+      strikes: 0,
+      vigilance: 0,
       blind: 'closed',
       thermo: START_TEMP,
       lampCount: 0,
       lampOn: false,
       inverter: 'off',
       speakerVolume: 0,
-      codeRevealed: false,
+      keysCollected: [],
+      finalPhase: false,
       solved: false,
-      gameOverActive: false,
+      vigilanceFlashActive: false,
+      handbookPage: 0,
     };
 
     let eyeState = 'green';
@@ -125,8 +220,57 @@
       return Math.min(max, Math.max(min, value));
     }
 
-    function currentTrick() {
-      return TRICKS[state.trickIndex] || TRICKS[TRICKS.length - 1];
+    function randomBetween(min, max) {
+      return min + Math.random() * (max - min);
+    }
+
+    function currentLevel() {
+      return LEVELS[state.levelIndex] || LEVELS[LEVELS.length - 1];
+    }
+
+    function normalizePhrase(str) {
+      return str.trim().replace(/\s+/g, ' ').toUpperCase();
+    }
+
+    function warmthFor(temp) {
+      return clamp((temp - MIN_TEMP) / (MAX_TEMP - MIN_TEMP), 0, 1);
+    }
+
+    // Csak a nagy sztori-pillanatoknál és kérdéseknél szólal meg — a kérdések szövegét emiatt
+    // nem is kell kiírni képernyőre (lásd az onboarding-lépéseket), csak ha a böngésző nem
+    // támogatja a felolvasást (akkor írásban is megjelenik, biztonsági tartalékként).
+    function speak(text) {
+      if (!canSpeak) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'hu-HU';
+        utter.rate = 1;
+        utter.pitch = 0.95;
+        window.speechSynthesis.speak(utter);
+      } catch (err) {
+        /* speechSynthesis nem elérhető vagy blokkolva */
+      }
+    }
+
+    // ---------- Jarvis figyelés-ciklus, egyre szigorodó tartományokkal ----------
+
+    function vigilanceSteps() {
+      return Math.min(state.vigilance, MAX_VIGILANCE_STEPS);
+    }
+
+    function greenRange() {
+      const steps = vigilanceSteps();
+      const min = Math.max(GREEN_MIN_FLOOR, GREEN_MIN_BASE - steps * 75);
+      const max = Math.max(min + 400, GREEN_MAX_BASE - steps * 700);
+      return [min, max];
+    }
+
+    function redRange() {
+      const steps = vigilanceSteps();
+      const min = RED_MIN_BASE + steps * 60;
+      const max = Math.min(RED_MAX_CEIL, RED_MAX_BASE + steps * 150);
+      return [min, Math.max(min + 300, max)];
     }
 
     function renderEyeState() {
@@ -134,26 +278,20 @@
       eyeEl.classList.toggle('eye-red', eyeState === 'red');
       gateEl.classList.toggle('gate-eye-open', eyeState === 'red');
       gateEl.classList.toggle('gate-eye-closed', eyeState === 'green');
-      if (!state.codeRevealed) {
+      if (!state.finalPhase) {
         statusEl.textContent = eyeState === 'green'
           ? 'Jarvis most nem figyel — mozdulhatsz!'
           : 'Jarvis figyel! Állj meg!';
       }
     }
 
-    function randomBetween(min, max) {
-      return min + Math.random() * (max - min);
-    }
-
     function scheduleEyeTick() {
-      const delay = eyeState === 'green'
-        ? randomBetween(GREEN_MIN_MS, GREEN_MAX_MS)
-        : randomBetween(RED_MIN_MS, RED_MAX_MS);
+      const [min, max] = eyeState === 'green' ? greenRange() : redRange();
       eyeTimer = setTimeout(() => {
         eyeState = eyeState === 'green' ? 'red' : 'green';
         renderEyeState();
         scheduleEyeTick();
-      }, delay);
+      }, randomBetween(min, max));
     }
 
     function stopEyeCycle() {
@@ -161,7 +299,7 @@
     }
 
     function handleGateInteraction(onSafe) {
-      if (state.codeRevealed || state.gameOverActive) return;
+      if (!state.introDone || state.finalPhase || state.vigilanceFlashActive) return;
       if (eyeState === 'red') {
         registerCatch();
       } else {
@@ -178,6 +316,9 @@
       blindToggleBtn.textContent = isOpen
         ? 'Nyitva — kattints a záráshoz'
         : 'Zárva — kattints a nyitáshoz';
+      if (houseScene) {
+        if (isOpen) houseScene.openBlind(); else houseScene.closeBlind();
+      }
     }
 
     function renderInverter(justTurnedOn) {
@@ -192,6 +333,9 @@
         void inverterVisualEl.offsetWidth;
         inverterVisualEl.classList.add('pulse');
       }
+      if (houseScene) {
+        if (isOn) houseScene.activateSolar(); else houseScene.deactivateSolar();
+      }
     }
 
     function renderSpeaker() {
@@ -200,15 +344,18 @@
       speakerBarEls.forEach((bar, i) => {
         bar.classList.toggle('bar-active', i < activeBars);
       });
+      if (houseScene) {
+        if (state.speakerVolume > 0) houseScene.playMusic(); else houseScene.stopMusic();
+      }
     }
 
     function renderLamp() {
-      const trick = currentTrick();
+      const level = currentLevel();
       lampToggleBtn.classList.toggle('is-on', state.lampOn);
-      if (trick.lamp) {
-        lampToggleBtn.textContent = state.lampCount >= trick.lamp
+      if (level.lamp) {
+        lampToggleBtn.textContent = state.lampCount >= level.lamp
           ? 'Kész ✓'
-          : `Kattints még ${Math.max(trick.lamp - state.lampCount, 0)}x`;
+          : `Kattints még ${Math.max(level.lamp - state.lampCount, 0)}x`;
       } else {
         lampToggleBtn.textContent = 'Kattints';
       }
@@ -221,17 +368,17 @@
     }
 
     function updateChecks() {
-      const trick = currentTrick();
-      blindCheckEl.hidden = !('blind' in trick && state.blind === trick.blind);
-      thermoCheckEl.hidden = !('thermo' in trick && state.thermo === trick.thermo);
-      lampCheckEl.hidden = !('lamp' in trick && state.lampCount >= trick.lamp);
-      inverterCheckEl.hidden = !('inverter' in trick && state.inverter === trick.inverter);
-      speakerCheckEl.hidden = !('speaker' in trick && state.speakerVolume === trick.speaker);
+      const level = currentLevel();
+      blindCheckEl.hidden = !('blind' in level && state.blind === level.blind);
+      thermoCheckEl.hidden = !('thermo' in level && state.thermo === level.thermo);
+      lampCheckEl.hidden = !('lamp' in level && state.lampCount >= level.lamp);
+      inverterCheckEl.hidden = !('inverter' in level && state.inverter === level.inverter);
+      speakerCheckEl.hidden = !('speaker' in level && state.speakerVolume === level.speaker);
     }
 
     function afterWidgetChange() {
       updateChecks();
-      checkGateComplete();
+      checkLevelComplete();
     }
 
     // ---------- vezérlők interakciói ----------
@@ -248,6 +395,7 @@
       handleGateInteraction(() => {
         state.thermo = clamp(state.thermo + delta, MIN_TEMP, MAX_TEMP);
         thermoValueEl.textContent = `${state.thermo}°C`;
+        if (houseScene) houseScene.warmUp(warmthFor(state.thermo));
         afterWidgetChange();
       });
     }
@@ -278,92 +426,115 @@
       });
     }
 
-    // ---------- kör-logika ----------
+    // ---------- szint-logika ----------
 
-    function checkGateComplete() {
-      const trick = currentTrick();
-      const blindOk = !('blind' in trick) || state.blind === trick.blind;
-      const thermoOk = !('thermo' in trick) || state.thermo === trick.thermo;
-      const lampOk = !('lamp' in trick) || state.lampCount >= trick.lamp;
-      const inverterOk = !('inverter' in trick) || state.inverter === trick.inverter;
-      const speakerOk = !('speaker' in trick) || state.speakerVolume === trick.speaker;
+    function checkLevelComplete() {
+      const level = currentLevel();
+      const blindOk = !('blind' in level) || state.blind === level.blind;
+      const thermoOk = !('thermo' in level) || state.thermo === level.thermo;
+      const lampOk = !('lamp' in level) || state.lampCount >= level.lamp;
+      const inverterOk = !('inverter' in level) || state.inverter === level.inverter;
+      const speakerOk = !('speaker' in level) || state.speakerVolume === level.speaker;
 
-      if (blindOk && thermoOk && lampOk && inverterOk && speakerOk && !state.codeRevealed) {
-        revealCode();
+      if (blindOk && thermoOk && lampOk && inverterOk && speakerOk && !state.finalPhase) {
+        completeLevel();
       }
     }
 
-    function revealCode() {
-      state.codeRevealed = true;
+    function renderKeyChip(index, key) {
+      const chip = keyChipEls[index];
+      if (!chip) return;
+      chip.textContent = key;
+      chip.classList.add('filled');
+    }
+
+    function completeLevel() {
+      const level = currentLevel();
+      state.keysCollected.push(level.key);
+      renderKeyChip(state.levelIndex, level.key);
+      if (window.playSuccess) window.playSuccess();
+
+      if (state.levelIndex >= LEVELS.length - 1) {
+        enterFinalPhase();
+        return;
+      }
+
+      state.levelIndex += 1;
+      levelValueEl.textContent = String(state.levelIndex + 1);
+      resetWidgetsForCurrentLevel();
+      statusEl.textContent = `${level.key} megvan! Jöhet a következő szint.`;
+      jumpToLastHandbookPage();
+    }
+
+    function enterFinalPhase() {
+      state.finalPhase = true;
       stopEyeCycle();
       eyeState = 'green';
       eyeEl.classList.remove('eye-red');
       eyeEl.classList.add('eye-green', 'eye-victory');
       gateEl.classList.remove('gate-eye-open');
       gateEl.classList.add('gate-eye-closed');
-      statusEl.textContent = 'A rendszer résein kiszivárgott egy kód!';
+      statusEl.textContent = 'Mind az 5 kulcsszó megvan! Rakd össze a választ.';
       codeRevealEl.hidden = false;
       codeInputEl.focus();
-      updateHelpPanel();
+      jumpToLastHandbookPage();
     }
 
     function onGateSolved() {
       state.solved = true;
       gateEl.classList.add('gate-solved');
       statusEl.textContent = 'Jarvis kiiktatva. A rendszer felszabadult.';
+      causeRevealEl.hidden = false;
+      speak(`${state.userName}, kiderült: egy pók okozta a rövidzárlatot a szellőzőrendszerben!`);
       lockedRooms.forEach((el) => el.classList.remove('ai-locked'));
-      if (cardsPanelPlaceholder) cardsPanelPlaceholder.remove();
       progressTrackEl.hidden = false;
       progressLabelEl.hidden = false;
       rulesTextEl.hidden = false;
       if (window.playSuccess) window.playSuccess();
-      window.initPuzzle(PUZZLE_CONFIG);
-      updateHelpPanel();
+      window.initPuzzle(PUZZLE_CONFIG); // ez törli és újraépíti a cards-panel tartalmát (a kézikönyv helyén)
     }
 
-    // ---------- rajtakapás / game over / reset ----------
+    // ---------- rajtakapás / szigorodás ----------
 
     function registerCatch() {
-      state.attempts -= 1;
-      attemptsValueEl.textContent = String(Math.max(state.attempts, 0));
+      state.strikes += 1;
       gateEl.classList.add('caught-flash');
       setTimeout(() => gateEl.classList.remove('caught-flash'), 350);
       if (window.playMiss) window.playMiss();
+      statusEl.textContent = 'Rajtakapott! Jarvis gyanakvóbb lett.';
 
-      if (state.attempts <= 0) {
-        triggerGameOver();
-        return;
+      if (state.strikes % STRIKES_PER_ESCALATION === 0) {
+        escalateVigilance();
       }
-
-      state.trickIndex = Math.min(state.trickIndex + 1, TRICKS.length - 1);
-      resetWidgetsForCurrentTrick();
-      statusEl.textContent = 'Rajtakapott! Jarvis kiszúrta ezt a trükköt — jön egy másik.';
-      updateHelpPanel();
     }
 
-    function triggerGameOver() {
-      state.gameOverActive = true;
+    function escalateVigilance() {
+      state.vigilance += 1;
+      state.vigilanceFlashActive = true;
       stopEyeCycle();
-      gameOverEl.hidden = false;
-      gameOverMsgEl.textContent = GAMEOVER_MESSAGES[Math.floor(Math.random() * GAMEOVER_MESSAGES.length)];
+      vigilanceEl.hidden = false;
+      vigilanceMsgEl.textContent = VIGILANCE_MESSAGES[Math.floor(Math.random() * VIGILANCE_MESSAGES.length)];
+      speak(vigilanceMsgEl.textContent);
       gateEl.classList.add('gate-glitch');
       if (window.playMiss) window.playMiss();
       setTimeout(() => {
-        gameOverEl.hidden = true;
+        vigilanceEl.hidden = true;
         gateEl.classList.remove('gate-glitch');
-        state.gameOverActive = false;
-        resetGate();
+        state.vigilanceFlashActive = false;
+        eyeState = 'green';
+        renderEyeState();
+        scheduleEyeTick();
       }, 2600);
     }
 
     // A bináris kapcsolókat (redőny, inverter) SOSEM egy fix alapállapotra állítjuk vissza,
-    // hanem mindig az aktuális kör céljával ELLENTÉTES állapotra — különben, ha épp egybeesne
+    // hanem mindig az aktuális szint céljával ELLENTÉTES állapotra — különben, ha épp egybeesne
     // a "pihenő" alapállapottal az elvárt cél, azt a lépést ingyen, esemény nélkül teljesítené.
-    function resetWidgetsForCurrentTrick() {
-      const trick = currentTrick();
+    function resetWidgetsForCurrentLevel() {
+      const level = currentLevel();
 
-      state.blind = trick.blind ? (trick.blind === 'open' ? 'closed' : 'open') : 'closed';
-      state.inverter = trick.inverter ? (trick.inverter === 'on' ? 'off' : 'on') : 'off';
+      state.blind = level.blind ? (level.blind === 'open' ? 'closed' : 'open') : 'closed';
+      state.inverter = level.inverter ? (level.inverter === 'on' ? 'off' : 'on') : 'off';
       state.thermo = START_TEMP;
       state.speakerVolume = 0;
       state.lampCount = 0;
@@ -372,59 +543,278 @@
       renderBlind();
       renderInverter(false);
       thermoValueEl.textContent = `${START_TEMP}°C`;
+      if (houseScene) houseScene.warmUp(warmthFor(START_TEMP));
       renderSpeaker();
       renderLamp();
       updateChecks();
     }
 
     function resetGate() {
-      state.attempts = MAX_ATTEMPTS;
-      state.trickIndex = 0;
-      state.codeRevealed = false;
+      if (!state.introDone) return;
 
-      attemptsValueEl.textContent = String(MAX_ATTEMPTS);
+      state.levelIndex = 0;
+      state.strikes = 0;
+      state.vigilance = 0;
+      state.keysCollected = [];
+      state.finalPhase = false;
+
+      levelValueEl.textContent = '1';
+      keyChipEls.forEach((chip) => {
+        chip.textContent = '';
+        chip.classList.remove('filled');
+      });
       codeRevealEl.hidden = true;
       codeInputEl.value = '';
       codeErrorEl.hidden = true;
+      causeRevealEl.hidden = true;
 
-      resetWidgetsForCurrentTrick();
+      resetWidgetsForCurrentLevel();
 
       eyeState = 'green';
       eyeEl.classList.remove('eye-victory');
       renderEyeState();
       stopEyeCycle();
       scheduleEyeTick();
-      updateHelpPanel();
+      jumpToLastHandbookPage();
     }
 
-    function updateHelpPanel() {
-      if (state.solved) {
-        helpBodyEl.innerHTML =
-          '<p><strong>A Jarvis ki van iktatva.</strong> A ház eszközei újra elérhetők — húzd a ' +
-          'jobb oldali kártyákat a helyükre, hogy mindent helyreállíts!</p>';
-        return;
+    // ---------- lapozható biztonsági kézikönyv (jobb oldali panel) ----------
+
+    function handbookPages() {
+      const pages = [HANDBOOK_INTRO];
+
+      if (state.introDone) {
+        const lastLevel = (state.finalPhase || state.solved) ? LEVELS.length - 1 : state.levelIndex;
+        for (let i = 0; i <= lastLevel; i += 1) {
+          pages.push({ title: `${i + 1}. szint`, body: LEVELS[i].riddle });
+        }
       }
-      if (state.codeRevealed) {
-        helpBodyEl.innerHTML =
-          '<p>Megvan a kód! Írd be a négy számjegyet a mezőbe, hogy végleg kiiktasd a Jarvist.</p>';
+
+      if (state.finalPhase && !state.solved) {
+        pages.push({
+          title: 'Utolsó lépés',
+          body: 'Mind az 5 kulcsszó megvan! Rakd össze őket egy mondattá, és írd be a kapu-panel alján lévő mezőbe.',
+        });
+      }
+
+      return pages;
+    }
+
+    function renderHandbook() {
+      const pages = handbookPages();
+      state.handbookPage = clamp(state.handbookPage, 0, pages.length - 1);
+      const page = pages[state.handbookPage];
+      handbookTitleEl.textContent = page.title;
+      handbookBodyEl.textContent = page.body;
+      handbookCounterEl.textContent = `${state.handbookPage + 1} / ${pages.length}`;
+      handbookPrevBtn.disabled = state.handbookPage <= 0;
+      handbookNextBtn.disabled = state.handbookPage >= pages.length - 1;
+    }
+
+    function playHandbookTransition() {
+      handbookPageEl.classList.remove('page-turn');
+      void handbookPageEl.offsetWidth;
+      handbookPageEl.classList.add('page-turn');
+    }
+
+    function jumpToLastHandbookPage() {
+      const pages = handbookPages();
+      state.handbookPage = pages.length - 1;
+      playHandbookTransition();
+      renderHandbook();
+    }
+
+    handbookPrevBtn.addEventListener('click', () => {
+      state.handbookPage = Math.max(0, state.handbookPage - 1);
+      playHandbookTransition();
+      renderHandbook();
+    });
+    handbookNextBtn.addEventListener('click', () => {
+      const pages = handbookPages();
+      state.handbookPage = Math.min(pages.length - 1, state.handbookPage + 1);
+      playHandbookTransition();
+      renderHandbook();
+    });
+
+    // ---------- onboarding-varázsló ----------
+
+    function makeChoiceButton(label, onClick) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ai-dialogue-btn';
+      btn.textContent = label;
+      btn.addEventListener('click', onClick);
+      return btn;
+    }
+
+    function playOnboardingTransition() {
+      onboardingCardEl.classList.remove('step-enter');
+      void onboardingCardEl.offsetWidth;
+      onboardingCardEl.classList.add('step-enter');
+    }
+
+    function ensureHouseScene() {
+      if (!houseScene && window.createHouseScene) {
+        houseScene = window.createHouseScene(sceneCanvasEl);
+      }
+    }
+
+    function flashOnboardingScene() {
+      onboardingSceneEl.classList.remove('action-flash');
+      onboardingCardEl.classList.remove('action-flash');
+      void onboardingSceneEl.offsetWidth;
+      onboardingSceneEl.classList.add('action-flash');
+      onboardingCardEl.classList.add('action-flash');
+    }
+
+    function applyOnboardingEffect(step, yes) {
+      if (step.key === 'blind' && yes) {
+        state.blind = 'open';
+        renderBlind();
+        flashOnboardingScene();
+      } else if (step.key === 'music' && yes) {
+        state.speakerVolume = 6;
+        renderSpeaker();
+        if (window.playAmbientLoop) window.playAmbientLoop();
+        flashOnboardingScene();
+      } else if (step.key === 'heat' && yes) {
+        if (houseScene) houseScene.warmUp(warmthFor(START_TEMP));
+        flashOnboardingScene();
+      } else if (step.key === 'solar') {
+        if (houseScene) houseScene.activateSolar();
+        flashOnboardingScene();
+      }
+    }
+
+    function renderChoices(buttons) {
+      const row = document.createElement('div');
+      row.className = 'ai-onboarding-choices';
+      buttons.forEach((btn) => row.appendChild(btn));
+      onboardingBodyEl.appendChild(row);
+      return row;
+    }
+
+    function showOnboardingStep(index) {
+      if (index >= ONBOARDING_STEPS.length) {
+        finishOnboarding();
         return;
       }
 
-      const trick = currentTrick();
-      const isFinal = state.trickIndex === TRICKS.length - 1;
-      const introLine = state.trickIndex === 0
-        ? 'A Jarvis (ejtsd: Dzsárvisz, a ház "agya") meghibásodott, és zárolta az egész rendszert.'
-        : 'Jarvis kiszúrta az előző trükköt — ideje váltani.';
-      const trickLine = isFinal
-        ? `<strong>Utolsó próbálkozás!</strong> ${trick.describe}.`
-        : `${state.trickIndex + 1}. próbálkozás: ${trick.describe}.`;
+      const step = ONBOARDING_STEPS[index];
+      onboardingBodyEl.innerHTML = '';
+      onboardingLineEl.textContent = '';
+      onboardingSceneEl.hidden = !step.showScene;
+      if (step.showScene) ensureHouseScene();
+      playOnboardingTransition();
 
-      helpBodyEl.innerHTML =
-        `<p>${introLine}</p>` +
-        `<p>${trickLine}</p>` +
-        '<p>De csak akkor mozdulj, amikor a szem <strong style="color:#00ff9d">zöld</strong> — ha ' +
-        '<strong style="color:#ff5252">piros</strong> alatt hozzáérsz bármelyik vezérlőhöz, Jarvis ' +
-        'rajtakap, és elveszel egy próbálkozást.</p>';
+      if (step.type === 'welcome') {
+        onboardingEyebrowEl.textContent = '🏠 HÁZŐRZŐ';
+        onboardingLineEl.textContent =
+          'Üdvözöllek a Központi Automatizált Neurális Digitális Óvórendszerben!';
+        renderChoices([makeChoiceButton('Belépés', () => showOnboardingStep(index + 1))]);
+      } else if (step.type === 'name') {
+        onboardingEyebrowEl.textContent = '🏠 HÁZŐRZŐ — Bejelentkezés';
+        onboardingLineEl.textContent = 'Hogyan szólíthatlak?';
+        const form = document.createElement('form');
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.maxLength = 24;
+        input.placeholder = 'A neved';
+        input.setAttribute('aria-label', 'A neved');
+        input.autocomplete = 'off';
+        const submitBtn = document.createElement('button');
+        submitBtn.type = 'submit';
+        submitBtn.className = 'btn-primary';
+        submitBtn.textContent = 'Tovább';
+        form.append(input, submitBtn);
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          state.userName = input.value.trim() || 'Kedves Látogató';
+          showOnboardingStep(index + 1);
+        });
+        onboardingBodyEl.appendChild(form);
+        setTimeout(() => input.focus(), 50);
+      } else if (step.type === 'greeting') {
+        onboardingEyebrowEl.textContent = '🏠 HÁZŐRZŐ';
+        const line = `Szia, ${state.userName}! Örülök, hogy újra itt vagy.`;
+        onboardingLineEl.textContent = line;
+        speak(line);
+        renderChoices([makeChoiceButton('Szia!', () => showOnboardingStep(index + 1))]);
+      } else if (step.type === 'mood') {
+        const line = 'Milyen napod volt ma? Válassz egy arcot!';
+        if (!canSpeak) onboardingLineEl.textContent = line;
+        speak(line);
+        const buttons = MOOD_OPTIONS.map((mood) => {
+          const btn = makeChoiceButton(mood.emoji, () => {
+            onboardingBodyEl.innerHTML = '';
+            onboardingLineEl.textContent = mood.reply;
+            speak(mood.reply);
+            renderChoices([makeChoiceButton('Tovább', () => showOnboardingStep(index + 1))]);
+            playOnboardingTransition();
+          });
+          btn.classList.add('ai-mood-btn');
+          btn.setAttribute('aria-label', mood.label);
+          return btn;
+        });
+        renderChoices(buttons);
+      } else if (step.type === 'yesno') {
+        if (!canSpeak) onboardingLineEl.textContent = step.prompt;
+        speak(step.prompt);
+        const yesBtn = makeChoiceButton('Igen', () => {
+          applyOnboardingEffect(step, true);
+          onboardingBodyEl.innerHTML = '';
+          onboardingLineEl.textContent = step.yes;
+          speak(step.yes);
+          renderChoices([makeChoiceButton('Tovább', () => showOnboardingStep(index + 1))]);
+          playOnboardingTransition();
+        });
+        const noBtn = makeChoiceButton('Nem', () => {
+          applyOnboardingEffect(step, false);
+          onboardingBodyEl.innerHTML = '';
+          onboardingLineEl.textContent = step.no;
+          speak(step.no);
+          renderChoices([makeChoiceButton('Tovább', () => showOnboardingStep(index + 1))]);
+          playOnboardingTransition();
+        });
+        renderChoices([yesBtn, noBtn]);
+      } else if (step.type === 'info') {
+        if (!canSpeak) onboardingLineEl.textContent = step.prompt;
+        speak(step.prompt);
+        applyOnboardingEffect(step, true);
+        renderChoices([makeChoiceButton(step.ack, () => showOnboardingStep(index + 1))]);
+      }
+    }
+
+    function finishOnboarding() {
+      onboardingEl.hidden = true;
+      if (sceneCanvasEl.parentElement !== sceneWrapEl) {
+        sceneWrapEl.appendChild(sceneCanvasEl);
+        sceneWrapEl.hidden = false;
+        if (houseScene) houseScene.resize();
+      }
+      triggerMalfunction();
+    }
+
+    function triggerMalfunction() {
+      if (state.introDone) return;
+      state.introDone = true;
+      gateEl.classList.remove('intro-active');
+      if (window.stopAmbientLoop) window.stopAmbientLoop();
+      if (window.playGlitch) window.playGlitch();
+      gateEl.classList.add('gate-glitch', 'malfunction-shake');
+      streakEl.classList.remove('play');
+      void streakEl.offsetWidth;
+      streakEl.classList.add('play');
+      if (houseScene) houseScene.glitchOut(500);
+      speak(`${state.userName}, meghibásodás történt a központi rendszerben. Mindent zárolok.`);
+      setTimeout(() => {
+        gateEl.classList.remove('gate-glitch', 'malfunction-shake');
+        gateHeaderEl.hidden = false;
+        resetWidgetsForCurrentLevel();
+        renderEyeState();
+        scheduleEyeTick();
+        jumpToLastHandbookPage();
+      }, 500);
     }
 
     // ---------- eseménykötések ----------
@@ -439,16 +829,16 @@
 
     codeFormEl.addEventListener('submit', (e) => {
       e.preventDefault();
-      const value = codeInputEl.value.trim();
-      if (value === SECRET_CODE) {
+      const value = normalizePhrase(codeInputEl.value);
+      if (value === normalizePhrase(FINAL_PHRASE)) {
         onGateSolved();
       } else {
         codeErrorEl.hidden = false;
-        codeInputEl.value = '';
         codeInputEl.focus();
+        codeInputEl.select();
         setTimeout(() => {
           codeErrorEl.hidden = true;
-        }, 2200);
+        }, 2400);
       }
     });
 
@@ -457,19 +847,8 @@
       resetGate();
     });
 
-    helpToggleBtn.addEventListener('click', () => {
-      const willOpen = helpPanelEl.hidden;
-      helpPanelEl.hidden = !willOpen;
-      helpToggleBtn.setAttribute('aria-expanded', String(willOpen));
-    });
-    helpPanelCloseBtn.addEventListener('click', () => {
-      helpPanelEl.hidden = true;
-      helpToggleBtn.setAttribute('aria-expanded', 'false');
-    });
-
-    resetWidgetsForCurrentTrick();
-    renderEyeState();
-    scheduleEyeTick();
-    updateHelpPanel();
+    resetWidgetsForCurrentLevel();
+    renderHandbook();
+    showOnboardingStep(0);
   });
 })();
