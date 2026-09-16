@@ -700,6 +700,122 @@ body.theme-okoshaz .house-dashboard.fixed-dashboard .dashboard-text {
   font-size: 1.2rem;
 }
 
+.ai-blind-visual {
+  display: inline-block;
+  transform: scaleY(0.45);
+  opacity: 0.5;
+  transition: transform 0.4s cubic-bezier(.36, 1.4, .4, 1), opacity 0.4s ease;
+}
+
+.ai-blind-visual.is-open {
+  transform: scaleY(1);
+  opacity: 1;
+}
+
+.ai-inverter-visual {
+  display: inline-block;
+  opacity: 0.3;
+  filter: grayscale(1);
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+.ai-inverter-visual.is-on {
+  opacity: 1;
+  filter: drop-shadow(0 0 10px #ffd400);
+}
+
+.ai-inverter-visual.pulse {
+  animation: inverterPulse 0.6s ease;
+}
+
+@keyframes inverterPulse {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.ai-control-icon.flash {
+  animation: lampFlash 0.3s ease;
+}
+
+@keyframes lampFlash {
+  0% {
+    filter: brightness(1);
+  }
+  40% {
+    filter: brightness(2.2) drop-shadow(0 0 10px #ffe27a);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+
+.ai-speaker-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 20px;
+  margin-top: 6px;
+}
+
+.ai-speaker-bars span {
+  width: 5px;
+  border-radius: 2px;
+  background: #2a3a4a;
+  transition: background 0.25s ease;
+}
+
+.ai-speaker-bars span:nth-child(1) {
+  height: 20%;
+}
+
+.ai-speaker-bars span:nth-child(2) {
+  height: 40%;
+}
+
+.ai-speaker-bars span:nth-child(3) {
+  height: 60%;
+}
+
+.ai-speaker-bars span:nth-child(4) {
+  height: 80%;
+}
+
+.ai-speaker-bars span:nth-child(5) {
+  height: 100%;
+}
+
+.ai-speaker-bars span.bar-active {
+  background: var(--accent);
+  animation: speakerWave 1.2s infinite;
+}
+
+.ai-speaker-bars span.bar-active:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.ai-speaker-bars span.bar-active:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.ai-speaker-bars span.bar-active:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.ai-speaker-bars span.bar-active:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.ai-speaker-bars span.bar-active:nth-child(5) {
+  animation-delay: 0.4s;
+}
+
 .ai-code-reveal {
   margin-top: 16px;
   padding-top: 16px;

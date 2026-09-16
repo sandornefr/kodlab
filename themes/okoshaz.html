@@ -26,13 +26,22 @@
       <div class="ai-gate-header">
         <span class="ai-eye" id="ai-eye" aria-hidden="true"><span class="ai-eye-pupil"></span></span>
         <div class="ai-gate-heading">
-          <strong>HázAI zárolta a rendszert</strong>
-          <span id="ai-gate-status" aria-live="polite">Az AI figyeli a rendszert. Válassz pillanatot!</span>
+          <strong>Jarvis (ejtsd: Dzsárvisz) zárolta a rendszert</strong>
+          <span id="ai-gate-status" aria-live="polite">Jarvis figyeli a rendszert. Válassz pillanatot!</span>
         </div>
         <div class="ai-attempts">Próbálkozás: <span id="ai-attempts-value">5</span>/5</div>
       </div>
 
       <div class="ai-gate-controls">
+        <div class="ai-control" id="ai-blind-control">
+          <span class="ai-control-icon ai-blind-visual" id="ai-blind-visual" aria-hidden="true">🪟</span>
+          <div class="ai-control-body">
+            <span class="ai-control-label">Redőny</span>
+            <button type="button" class="ai-lamp-toggle" id="ai-blind-toggle">Zárva — kattints a nyitáshoz</button>
+          </div>
+          <span class="ai-control-check" id="ai-blind-check" hidden>✓</span>
+        </div>
+
         <div class="ai-control" id="ai-thermo-control">
           <span class="ai-control-icon">🌡️</span>
           <div class="ai-control-body">
@@ -47,12 +56,37 @@
         </div>
 
         <div class="ai-control" id="ai-lamp-control">
-          <span class="ai-control-icon">💡</span>
+          <span class="ai-control-icon" id="ai-lamp-icon">💡</span>
           <div class="ai-control-body">
             <span class="ai-control-label">Lámpakapcsoló</span>
-            <button type="button" class="ai-lamp-toggle" id="ai-lamp-toggle">Kattints 3x</button>
+            <button type="button" class="ai-lamp-toggle" id="ai-lamp-toggle">Kattints</button>
           </div>
           <span class="ai-control-check" id="ai-lamp-check" hidden>✓</span>
+        </div>
+
+        <div class="ai-control" id="ai-inverter-control">
+          <span class="ai-control-icon ai-inverter-visual" id="ai-inverter-visual" aria-hidden="true">☀️</span>
+          <div class="ai-control-body">
+            <span class="ai-control-label">Napelem inverter</span>
+            <button type="button" class="ai-lamp-toggle" id="ai-inverter-toggle">Kikapcsolva — kattints a bekapcsoláshoz</button>
+          </div>
+          <span class="ai-control-check" id="ai-inverter-check" hidden>✓</span>
+        </div>
+
+        <div class="ai-control" id="ai-speaker-control">
+          <span class="ai-control-icon">🔊</span>
+          <div class="ai-control-body">
+            <span class="ai-control-label">Hangszóró hangereje</span>
+            <div class="ai-stepper">
+              <button type="button" class="ai-stepper-btn" id="ai-speaker-minus" aria-label="Halkítás">−</button>
+              <span class="ai-stepper-value" id="ai-speaker-value">0</span>
+              <button type="button" class="ai-stepper-btn" id="ai-speaker-plus" aria-label="Hangosítás">+</button>
+            </div>
+            <div class="ai-speaker-bars" id="ai-speaker-bars" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <span class="ai-control-check" id="ai-speaker-check" hidden>✓</span>
         </div>
       </div>
 
@@ -103,7 +137,7 @@
   </section>
 
   <aside class="cards-panel" id="cards-panel">
-    <p class="cards-panel-placeholder" id="cards-panel-placeholder">🔒 Előbb iktasd ki a HázAI-t, hogy előkerüljenek a javító kártyák.</p>
+    <p class="cards-panel-placeholder" id="cards-panel-placeholder">🔒 Előbb iktasd ki a Jarvist, hogy előkerüljenek a javító kártyák.</p>
   </aside>
 
   <footer class="rules-bar">
